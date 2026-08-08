@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -337,19 +337,19 @@
         }
 
         .invoice-logo {
-            width: 110px;
-            height: 110px;
-            background: #f8f9fa;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
+            width: 400px;
+            height: 200px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #999;
-            font-size: 12px;
+            font-size: 14px;
             cursor: pointer;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 10px;
+            box-shadow: none;
         }
 
         .invoice-logo img {
@@ -528,6 +528,23 @@
             color: white;
         }
 
+        .total-row.balance-due-row {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            padding: 7px 12px;
+            margin-top: 6px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .total-row.balance-due-row .label {
+            color: white;
+        }
+
+        .total-row.balance-due-row input {
+            color: white;
+        }
+
         .editable-input {
             padding: 2px 6px;
             border: 1px dashed #999;
@@ -544,48 +561,6 @@
             outline: none;
             border-color: #667eea;
             background: #f8f9fa;
-        }
-
-        .balance-due-box {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-            color: white;
-            padding: 5px 10px;
-            text-align: center;
-            border-radius: 4px;
-            margin-top: 8px;
-            box-shadow: 0 3px 10px rgba(255,107,107,0.3);
-            width: 130px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .balance-due-label {
-            font-size: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .balance-due-amount {
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        .balance-due-input {
-            background: rgba(255,255,255,0.2);
-            border: 1px dashed white;
-            color: white;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-            width: 75px;
-            text-align: center;
-        }
-
-        .balance-due-input:focus {
-            outline: none;
-            background: rgba(255,255,255,0.3);
         }
 
         .invoice-notes {
@@ -753,18 +728,20 @@
                 padding: 0;
             }
             .container {
-                box-shadow: none;
-                padding: 20px;
-            }
-            .btn {
-                display: none;
-            }
-            #invoiceForm {
-                display: none;
+                display: none !important;
             }
             #invoicePreview {
                 display: block !important;
+                box-shadow: none;
                 border: none;
+                max-width: 100%;
+                padding: 10mm;
+            }
+            .preview-actions {
+                display: none !important;
+            }
+            .btn {
+                display: none !important;
             }
         }
     </style>
@@ -780,20 +757,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Company Name</label>
-                        <input type="text" id="companyName" placeholder="Your Company Name" required>
+                        <input type="text" id="companyName" placeholder="Your Company Name" value="Star Cellular Whole Sale" required>
                     </div>
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" id="companyEmail" placeholder="company@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="companyPhone" placeholder="+92 300 1234567">
+                        <input type="email" id="companyEmail" placeholder="company@email.com" value="www.starcellularwholesale.com">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Address</label>
-                    <textarea id="companyAddress" placeholder="Company Address"></textarea>
+                    <textarea id="companyAddress" placeholder="Company Address">550 Dowlen Rd, Beaumont, Texas 77706</textarea>
                 </div>
             </div>
 
@@ -810,9 +783,15 @@
                         <input type="email" id="clientEmail" placeholder="client@email.com">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Address</label>
-                    <textarea id="clientAddress" placeholder="Client Address"></textarea>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea id="clientAddress" placeholder="Client Address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Ship To Address</label>
+                        <textarea id="shipAddress" placeholder="Ship To Address"></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -831,10 +810,6 @@
                     <div class="form-group">
                         <label>Due Date</label>
                         <input type="date" id="dueDate">
-                    </div>
-                    <div class="form-group">
-                        <label>Payment Terms</label>
-                        <input type="text" id="paymentTerms" placeholder="Net 30">
                     </div>
                 </div>
                 <div class="form-row">
@@ -917,7 +892,6 @@
                 <input type="file" id="logoUpload" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
                 <div style="font-size:15px;font-weight:700;color:#333;margin-top:6px;" id="previewCompanyName"></div>
                 <div style="font-size:12px;color:#666;" id="previewCompanyEmail"></div>
-                <div style="font-size:12px;color:#666;" id="previewCompanyPhone"></div>
                 <div style="font-size:12px;color:#666;" id="previewCompanyAddress"></div>
             </div>
             <div class="invoice-title-section">
@@ -930,10 +904,6 @@
                     <div class="invoice-meta-row">
                         <span class="invoice-meta-label">Date:</span>
                         <input type="text" class="invoice-meta-input" id="editInvoiceDate" value="">
-                    </div>
-                    <div class="invoice-meta-row">
-                        <span class="invoice-meta-label">Payment Terms:</span>
-                        <input type="text" class="invoice-meta-input" id="editPaymentTerms" value="">
                     </div>
                     <div class="invoice-meta-row">
                         <span class="invoice-meta-label">Due Date:</span>
@@ -983,39 +953,33 @@
                     <span class="label">Total:</span>
                     <input type="text" class="editable-input" id="editTotal" value="$ 0.00" style="background:transparent;border:1px dashed rgba(255,255,255,0.5);color:white;width:110px;">
                 </div>
+                <div class="total-row balance-due-row">
+                    <span class="label">Balance Due:</span>
+                    <input type="text" class="editable-input" id="editBalanceDue" value="$ 0.00" style="background:transparent;border:1px dashed rgba(255,255,255,0.5);color:white;width:110px;">
+                </div>
             </div>
-        </div>
-
-        <div class="balance-due-box">
-            <div class="balance-due-label">Balance Due</div>
-            <input type="text" class="balance-due-input" id="editBalanceDue" value="$ 0.00">
         </div>
 
         <!-- Notes & Payment Info -->
         <div class="invoice-bottom-info">
             <div class="invoice-bottom-notes">
                 <h4>Notes</h4>
-                <p>2 Day Inspection Warranty Upon Receipt</p>
+                <input type="text" class="editable-input" id="editNotes" value="2 Day Inspection Warranty Upon Receipt" style="background:transparent;border:1px dashed #667eea;color:#333;width:100%;padding:5px;">
             </div>
             <div class="invoice-bottom-payment">
-                <h4>Payment Info</h4>
-                <div class="payment-info-row"><span class="pi-label">Beneficiary Name:</span><span class="pi-value">Select Cellphone LLC</span></div>
+                <h4>Wire Info</h4>
+                <div class="payment-info-row"><span class="pi-label">Company Name:</span><span class="pi-value">Starellular Wholesale</span></div>
+                <div class="payment-info-row"><span class="pi-label">Email:</span><span class="pi-value">www.starstarstarcellularwholesale.com</span></div>
+                <div class="payment-info-row"><span class="pi-label">Company Address:</span><span class="pi-value">550 Dowlen Rd, Beaumont, Texas 77706</span></div>
+                <div class="payment-info-row"><span class="pi-label">Beneficiary Name:</span><span class="pi-value">Starellular Wholesale</span></div>
                 <div class="payment-info-row"><span class="pi-label">Account #:</span><span class="pi-value">835298768</span></div>
                 <div class="payment-info-row"><span class="pi-label">Wire Routing:</span><span class="pi-value">111000614</span></div>
                 <div class="payment-info-row"><span class="pi-label">Swift Code:</span><span class="pi-value">CHASUS33</span></div>
-                <div class="payment-info-row"><span class="pi-label">Company Address:</span><span class="pi-value">550 Dowlen Rd, Beaumont, Texas 77706</span></div>
                 <div class="payment-info-row"><span class="pi-label">Bank Name:</span><span class="pi-value">Chase Bank</span></div>
                 <div class="payment-info-row"><span class="pi-label">Bank Address:</span><span class="pi-value">350 Dowlen Rd, Beaumont, Texas 77706</span></div>
             </div>
         </div>
 
-        <div class="invoice-footer">
-            <div class="invoice-footer-signatory">
-                <p class="for-company">FOR <span id="previewFooterCompany"></span></p>
-                <div class="signature-space"></div>
-                <p class="signatory-label">Authorised Signatory</p>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -1080,11 +1044,11 @@
             // Get form values
             const companyName = document.getElementById('companyName').value;
             const companyEmail = document.getElementById('companyEmail').value;
-            const companyPhone = document.getElementById('companyPhone').value;
             const companyAddress = document.getElementById('companyAddress').value;
             const clientName = document.getElementById('clientName').value;
             const clientEmail = document.getElementById('clientEmail').value;
             const clientAddress = document.getElementById('clientAddress').value;
+            const shipAddress = document.getElementById('shipAddress').value;
             const invoiceNumber = document.getElementById('invoiceNumber').value;
             const invoiceDate = document.getElementById('invoiceDate').value;
             const dueDate = document.getElementById('dueDate').value;
@@ -1097,17 +1061,16 @@
             // Populate preview
             document.getElementById('previewCompanyName').textContent = companyName;
             document.getElementById('previewCompanyEmail').textContent = companyEmail;
-            document.getElementById('previewCompanyPhone').textContent = companyPhone;
             document.getElementById('previewCompanyAddress').textContent = companyAddress;
             document.getElementById('previewClientName').textContent = clientName;
             document.getElementById('previewClientEmail').textContent = clientEmail;
             document.getElementById('previewClientAddress').textContent = clientAddress;
-            document.getElementById('previewFooterCompany').textContent = companyName || 'Company Name';
+            document.getElementById('previewShipName').textContent = clientName;
+            document.getElementById('previewShipAddress').textContent = shipAddress || clientAddress;
             
             // Set editable values
             document.getElementById('editInvoiceNumber').value = invoiceNumber;
             document.getElementById('editInvoiceDate').value = invoiceDate;
-            document.getElementById('editPaymentTerms').value = document.getElementById('paymentTerms').value || 'Net 30';
             document.getElementById('editDueDate').value = dueDate || '';
             document.getElementById('editTax').value = document.getElementById('taxAmount').textContent;
             document.getElementById('editTotal').value = document.getElementById('grandTotal').textContent;
@@ -1154,45 +1117,79 @@
             document.getElementById('invoiceForm').style.display = 'block';
         }
 
-        // Download as PDF — standard A4 format
+        // Download as PDF — uses html2pdf if available, falls back to print
         function downloadPDF() {
             const element = document.getElementById('invoicePreview');
             const invoiceNumber = document.getElementById('editInvoiceNumber').value || 'invoice';
-
             const actions = document.querySelector('.preview-actions');
             const logoPlaceholder = document.getElementById('logoPlaceholder');
+
             actions.style.display = 'none';
             if (logoPlaceholder) logoPlaceholder.style.display = 'none';
 
-            const opt = {
-                margin: 0,
-                filename: `Invoice_${invoiceNumber.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    letterRendering: true
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-                pagebreak: { mode: 'avoid-all' }
-            };
+            if (typeof html2pdf !== 'undefined') {
+                const opt = {
+                    margin: 0,
+                    filename: `Invoice_${invoiceNumber.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        letterRendering: true
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { mode: 'avoid-all' }
+                };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                actions.style.display = 'flex';
+                html2pdf().set(opt).from(element).save().then(() => {
+                    actions.style.display = 'flex';
+                    if (logoPlaceholder && document.getElementById('logoImage').style.display === 'none') {
+                        logoPlaceholder.style.display = 'flex';
+                    }
+                }).catch(err => {
+                    console.error('PDF generation error:', err);
+                    printFallback(actions, logoPlaceholder);
+                });
+            } else {
+                // Fallback: print dialog (Save as PDF)
+                printFallback(actions, logoPlaceholder);
+            }
+        }
+
+        function printFallback(actions, logoPlaceholder) {
+            // Hide form, show only invoice for printing
+            const form = document.getElementById('invoiceForm');
+            const preview = document.getElementById('invoicePreview');
+            form.style.display = 'none';
+            preview.style.display = 'block';
+
+            const style = document.createElement('style');
+            style.id = 'print-override';
+            style.innerHTML = `
+                @media print {
+                    body > .container { display: none !important; }
+                    #invoicePreview { display: block !important; }
+                    .preview-actions { display: none !important; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            window.print();
+
+            setTimeout(() => {
+                const s = document.getElementById('print-override');
+                if (s) s.remove();
+                if (actions) actions.style.display = 'flex';
                 if (logoPlaceholder && document.getElementById('logoImage').style.display === 'none') {
                     logoPlaceholder.style.display = 'flex';
                 }
-            }).catch(err => {
-                console.error('PDF generation error:', err);
-                alert('Error generating PDF. Please try again.');
-                actions.style.display = 'flex';
-            });
+            }, 1000);
         }
 
         // Initialize listeners
