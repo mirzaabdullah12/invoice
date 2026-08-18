@@ -761,7 +761,7 @@
         <form id="invoiceForm">
             <!-- Company Details -->
             <div class="form-section">
-                <h3>ðŸ¢ Company Details</h3>
+                <h3>🏢 Company Details</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Company Name</label>
@@ -792,6 +792,16 @@
                     </div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="clientPhone" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <label>EIN Number</label>
+                        <input type="text" id="clientEIN" placeholder="EIN Number">
+                    </div>
+                </div>
+                <div class="form-row"><div class="form-row">
                     <div class="form-group">
                         <label>Company Name</label>
                         <textarea id="clientAddress" placeholder="Client Company Name"></textarea>
@@ -963,21 +973,21 @@
 
         <div class="invoice-totals">
             <div class="totals-box">
-                <div class="total-row grand-total">
-                    <span class="label">Total:</span>
-                    <input type="text" class="editable-input" id="editTotal" value="Rs. 0.00" style="background:transparent;border:none;color:white;width:110px;">
-                </div>
                 <div class="total-row">
-                    <span class="label">Shipping Cost:</span>
-                    <input type="text" class="editable-input" id="editShippingCost" value="Rs. 0.00">
+                    <span class="label">Subtotal:</span>
+                    <span class="value" id="previewSubtotal">Rs. 0.00</span>
                 </div>
                 <div class="total-row">
                     <span class="label">Tax:</span>
                     <input type="text" class="editable-input" id="editTax" value="Rs. 0.00">
                 </div>
                 <div class="total-row">
-                    <span class="label">Subtotal:</span>
-                    <span class="value" id="previewSubtotal">Rs. 0.00</span>
+                    <span class="label">Shipping Cost:</span>
+                    <input type="text" class="editable-input" id="editShippingCost" value="Rs. 0.00">
+                </div>
+                <div class="total-row grand-total">
+                    <span class="label">Total:</span>
+                    <input type="text" class="editable-input" id="editTotal" value="Rs. 0.00" style="background:transparent;border:none;color:white;width:110px;">
                 </div>
             </div>
         </div>
@@ -1060,9 +1070,8 @@
             });
             
             const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-            const shippingCost = parseFloat(document.getElementById('shippingCost').value) || 0;
             const taxAmount = subtotal * (taxRate / 100);
-            const grandTotal = subtotal + taxAmount + shippingCost;
+            const grandTotal = subtotal + taxAmount;
             
             document.getElementById('subtotal').textContent = 'Rs. ' + subtotal.toFixed(2);
             document.getElementById('taxAmount').textContent = 'Rs. ' + taxAmount.toFixed(2);
@@ -1234,7 +1243,6 @@
         
         // Add tax rate listener
         document.getElementById('taxRate').addEventListener('input', calculateTotal);
-        document.getElementById('shippingCost').addEventListener('input', calculateTotal);
         
         // Initialize drag and drop after DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
@@ -1606,5 +1614,11 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
